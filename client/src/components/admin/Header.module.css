@@ -1,0 +1,55 @@
+/* Header.module.css */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #1f2937;
+  color: #fff;
+  padding: 20px;
+}
+.header h1 span {
+  color: #22c55e;
+}
+.header .actions {
+  display: flex;
+  align-items: center;
+}
+.header .search {
+  padding: 10px;
+  margin-right: 20px;
+  border-radius: 5px;
+  border: none;
+}
+
+/* Media Queries for Header */
+@media (max-width: 768px) {
+  .header {
+    padding: 15px;
+  }
+
+  .header h1 {
+    font-size: 18px;
+  }
+
+  .header .search {
+    padding: 8px;
+  }
+
+  .header .actions i {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 600px) {
+  .header h1 {
+    font-size: 16px;
+  }
+
+  .header .actions {
+    flex-direction: column;
+  }
+
+  .header .search {
+    display: none;
+  }
+}
