@@ -1,0 +1,72 @@
+.dashboard {
+  display: flex;
+  height: 100vh;
+}
+
+.mainContent {
+  flex-grow: 1;
+  background-color: #111827;
+  margin-left: 250px;
+  padding: 20px 60px 10px;
+}
+
+.toggleButton {
+  display: none;
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  background-color: #22c55e;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.sidebarWrapper {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  width: 250px;
+  transition: transform 0.3s ease;
+  transform: translateX(0); /* Initially hidden */
+  background-color: #1f2937;
+}
+
+.showSidebar {
+  transform: translateX(0); /* Brings sidebar into view */
+}
+
+/* Media Queries for Layout */
+@media (max-width: 768px) {
+  .dashboard {
+    flex-direction: column;
+  }
+
+  .mainContent {
+    margin-left: 0;
+    height: 100%;
+  }
+
+  .toggleButton {
+    display: block;
+  }
+
+  .sidebarWrapper {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100%;
+    transform: translateX(-100%);
+  }
+
+  .showSidebar {
+    transform: translateX(0); /* Bring sidebar back on-screen when toggled */
+  }
+}
+
+@media (max-width: 600px) {
+  .mainContent {
+    padding-top: 20px;
+  }
+}
