@@ -1,5 +1,6 @@
 // server/controllers/authController.js
 import User from '../models/userModel.js';
+import Student from '../models/studentModel.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
@@ -38,10 +39,25 @@ export const loginUser = async (req, res) => {
       return res.status(200).json({ message: 'Invalid credentials' });
     }
 
+    // Check if the user is a student and retrieve the studentID
+    let studentId = null;
+    let studentID = null;
+    if (user.role === 'student') {
+      const student = await Student.findOne({ userId: user._id }).select('_id, studentID'); // Query by userId and select the studentId (_id)
+      if (student) {
+        studentId = student._id; // Use the student's _id as the studentId
+        studentID = student.studentID;
+      }
+    }
+
     // Generate token
-    const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, {
-      expiresIn: '1h',
-    });
+    const tokenPayload = {
+      userId: user._id,
+      role: user.role,
+      ...(studentId && { studentId: studentId.toString() }), // Include studentId in the payload if applicable
+      ...(studentID && { studentID: studentID }), // Include studentId in the payload if applicable
+    };
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     res.cookie('token', token, { 
       httpOnly: true, 
@@ -51,7 +67,14 @@ export const loginUser = async (req, res) => {
     }).status(200).json({
       message: 'Login successful',
       token,
-      user: { name: user.name, email: user.email, role: user.role }
+      user: { 
+        id: user._id, 
+        name: user.name, 
+        email: user.email, 
+        role: user.role,
+        ...(studentId && { studentId }), // Include studentId in the response if applicable 
+        ...(studentID && { studentID }), // Include studentId in the response if applicable 
+      }
     })
 
   } catch (error) {

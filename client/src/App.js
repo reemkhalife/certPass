@@ -10,8 +10,9 @@ import AdminDashboard from './pages/admin/adminDashboard';
 import RequestsPage from './components/admin/RequestsPage';
 import StudentsPage from './components/admin/StudentsPage';
 import Certificates from './components/admin/Certificates';
-import CertificateModel from './components/admin/CertificateModel';
-import CustomFieldForm from './components/admin/CustomFieldRequest';
+// import CertificateModel from './components/admin/CertificateModel';
+import CustomFieldRequest from './components/admin/CustomFieldRequest';
+import CustomFieldForm from './components/admin/CustomFieldForm';
 
 import StudentForm from './pages/user/StudentForm';
 
