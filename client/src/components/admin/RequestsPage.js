@@ -26,6 +26,7 @@ const RequestsPage = () => {
          // Ensure `data` is an array before setting state
          if (Array.isArray(data)) {
           setRequests(data);
+          console.log(data);
           // setLoading(false);
         } else {
           console.error("Expected data to be an array, received:", data);
@@ -91,7 +92,8 @@ const RequestsPage = () => {
               <table>
                 <thead>
                   <tr>
-                    <th>Student</th>
+                    <th>Student ID</th>
+                    <th>Student Name</th>
                     <th>Request Type</th>
                     <th>Status</th>
                     <th>Submitted At</th>
@@ -101,6 +103,7 @@ const RequestsPage = () => {
                 <tbody>
                   {Array.isArray(requests) && requests.map((request) => (
                     <tr key={request._id}>
+                      <td>{request.studentId.studentID}</td>
                       <td>{request.studentId.userId.name}</td>
                       <td>{request.requestType}</td>
                       <td>{request.status}</td>

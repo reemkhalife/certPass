@@ -38,7 +38,12 @@ export const AuthProvider = ({ children }) => {
         setUser({ id: data.user.id, role: data.user.role }); 
         localStorage.setItem('userId', data.user.id);
         localStorage.setItem('userRole', data.user.role);
+        if (data.user.role === "student") {
+          localStorage.setItem('studentId', data.user.studentId);
+          localStorage.setItem('studentFileNb', data.user.studentID); 
+        }
         console.log('logged in');
+        console.log(data.user);
         return true;
       }  else {
         // Handle the case when user is not defined

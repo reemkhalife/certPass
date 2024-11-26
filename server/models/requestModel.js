@@ -22,7 +22,11 @@ const certificateDataSchema = new Schema({
   customOrganizationName: { 
     type: String, 
     default: null // Only set if 'Other' is selected
-  }
+  },
+  fileUrl: { 
+    type: String, 
+    // required: true 
+  },
 }, { _id: false }); // Disable _id for sub-schema
 
 // Define documentData sub-schema
@@ -46,6 +50,7 @@ const requestSchema = new Schema({
   studentId: { 
     type: Types.ObjectId, 
     ref: 'Student', 
+    // ref: 'Student', 
     required: true 
   },
   requestType: { 
@@ -67,6 +72,9 @@ const requestSchema = new Schema({
         type: Types.ObjectId,
         ref: 'CustomField',
         required: true,
+      },
+      label: {
+        type: String,
       },
       value: {
         type: Schema.Types.Mixed, // Store the actual value (e.g., string, number)

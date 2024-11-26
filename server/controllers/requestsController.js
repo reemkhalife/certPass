@@ -9,12 +9,13 @@ export const getAllRequests = async (req, res) => {
     const requests = await Request.find()
       .populate({
         path: 'studentId', // Populate the studentId field in Request model
-        select: 'userId', // Select userId from Student model to populate user details
+        select: 'userId studentID', // Select userId from Student model to populate user details
         populate: {
           path: 'userId', // Now populate the userId field in Student model
           select: 'name email', // Select the name and email from User model
         }
       });
+      console.log(requests);
     res.status(200).json(requests);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching requests' });
@@ -102,5 +103,52 @@ export const rejectRequest = async (req, res) => {
     res.status(200).json(request);
   } catch (error) {
     res.status(500).json({ message: 'Error rejecting request' });
+  }
+};
+
+// Create a new request
+export const createRequest = async (req, res) => {
+  try {
+    // Parse request data
+    console.log(req.body);
+    const { studentId, requestType, certificateData, customFields } = req.body; // 'data' is the stringified JSON object
+
+    // Validate request type
+    if (requestType !== "certificate") {
+      return res.status(400).json({ error: "Invalid request type" });
+    }
+
+    // Validate issuing organization within certificateData
+    if (
+      !certificateData.issuingOrganization &&
+      !certificateData.customOrganizationName
+    ) {
+      return res.status(400).json({
+        error:
+          "Either issuingOrganization or customOrganizationName must be provided.",
+      });
+    }
+
+    // Prepare request data for database
+    const requestData = {
+      studentId,
+      requestType,
+      certificateData,
+      customFields,
+    };
+    
+    // Save request to the database
+    const newRequest = await Request.create(requestData);
+
+    res.status(201).json({
+      message: 'Request submitted successfully!',
+      data: newRequest,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: 'Error creating request.',
+      error: error.message,
+    });
   }
 };
