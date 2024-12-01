@@ -15,6 +15,9 @@ import CustomFieldRequest from './components/admin/CustomFieldRequest';
 import CustomFieldForm from './components/admin/CustomFieldForm';
 
 import StudentForm from './pages/user/StudentForm';
+import SignUp from './pages/SignUp.js';
+import SignIn from './pages/SignIn.js';
+import Dashboard from './pages/Dashboard.js';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(AuthContext);
@@ -48,6 +51,9 @@ function App() {
           <Route path="/admin/dashboard/certificates" element={<Certificates/>} />
           <Route path="/user/dashboard" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
           <Route path="/user/dashboard/form" element={<ProtectedRoute><StudentForm /></ProtectedRoute>} />
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/dashboard" element={<Dashboard/>}/>
 
           {/* Default Route */}
           <Route path="*" element={<Navigate to="/login" />} />
