@@ -70,7 +70,7 @@ function Sidebar({ activeMenu, setActiveMenu }) {
 
       {/* Toggle Button */}
       <button
-        className={`absolute top-2 ${isOpen ? "left-[16.5rem]" : "left-[4.5rem]"} p-3 rounded-full text-custom-green hover:bg-gray-700 focus:outline-none transition-all duration-300 text-xl`}
+        className={`absolute top-2 bg-custom-gray ${isOpen ? "left-[16.5rem]" : "left-[4.5rem]"} p-3 rounded-full text-custom-green hover:bg-gray-500 focus:outline-none transition-all duration-300 text-xl`}
         onClick={toggleSidebar}
       >
         {isOpen ? <FaChevronLeft /> : <FaChevronRight />}
