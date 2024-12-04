@@ -8,7 +8,7 @@ export default function Header() {
 
   return (
     <header className={styles.header}>
-      <h1>Welcome <span>Sultan</span></h1>
+      <h1>Welcome <span>User</span></h1>
       <div className={styles.actions}>
         <i className="fa fa-user"></i>
       </div>

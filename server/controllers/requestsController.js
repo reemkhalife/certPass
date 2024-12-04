@@ -1,12 +1,19 @@
 import Request from "../models/requestModel.js";
 import Certificate from "../models/certificateModel.js";
+import PDFDocument from 'pdfkit';
 import QRCode from 'qrcode';
+import fs from 'fs';
+import path from 'path';
 
 // Get all requests
 export const getAllRequests = async (req, res) => {
   try {
-    // const requests = await Request.find().populate('studentId', 'name email'); // Populate student details
-    const requests = await Request.find()
+    const { requestType, status } = req.query; // Extract filters from query params
+    const filter = {};
+
+    if (requestType) filter.requestType = requestType;
+    if (status) filter.status = status;
+    const requests = await Request.find(filter)
       .populate({
         path: 'studentId', // Populate the studentId field in Request model
         select: 'userId studentID', // Select userId from Student model to populate user details
@@ -30,16 +37,20 @@ export const verifyRequest = async (req, res) => {
       id,
       { status: 'verified', verifiedAt: new Date() },
       { new: true }
-    );
-    console.log('request verified');
+    ).populate({
+      path: 'studentId',
+      select: 'studentID userId',
+      populate: {
+        path: 'userId',
+        select: 'name email',
+      },
+   });
+    console.log(request);
     if (!request) {
       return res.status(404).json({ message: 'Request not found' });
     }
-    console.log('certificateData:', request.certificateData);
-    console.log('creating certificate');
     // If the request is for a certificate, create a new certificate document
     if (request.requestType === 'certificate') {
-      // const { name, description, issueDate, issuingOrganization, fileUrl } = request.certificateData;
       const {
         name,
         description,
@@ -47,8 +58,6 @@ export const verifyRequest = async (req, res) => {
         issuingOrganization,
         fileUrl = 'http://example.com/default-certificate.pdf', // Default value
       } = request.certificateData || {};
-
-
       if (!name || !fileUrl) {
         return res.status(400).json({ message: 'Missing required certificate data' });
       }
@@ -61,27 +70,32 @@ export const verifyRequest = async (req, res) => {
         issueDate,
         issuingOrganization,
         fileUrl,
-      });
+      });  
       try {
-      console.log('saving certificate');
-      // Save the certificate
-      await certificate.save();
-      console.log('generating qrcode');
-      // Generate the QR code for the certificate
-      await certificate.generateQRCode();
-      console.log('qrcode generated');
-      // Send back the certificate as part of the response
-      return res.status(200).json({
-        message: 'Request verified and certificate created',
-        certificate,
-      });
-    } catch (error) {
-      console.error('Error saving certificate:', error);
-      return res.status(500).json({ message: 'Error saving certificate' });
+        // Save the certificate
+        const savedCertificate = await certificate.save();
+        // Generate the QR code for the certificate
+        await certificate.generateQRCode();
+        const populatedCertificate = await Certificate.findById(
+          savedCertificate._id
+        ).populate({
+          path: 'studentId',
+          select: 'studentID userId',
+          populate: {
+            path: 'userId',
+            select: 'name email',
+          },
+       });
+        // Send back the certificate as part of the response
+        return res.status(200).json({
+          message: 'Request verified and certificate created',
+          certificate: populatedCertificate,
+        });
+      } catch (error) {
+        console.error('Error saving certificate:', error);
+        return res.status(500).json({ message: 'Error saving certificate' });
+      }
     }
-    }
-
-    res.status(200).json(request);
   } catch (error) {
     res.status(500).json({ message: 'Error verifying request' });
   }
@@ -96,7 +110,14 @@ export const rejectRequest = async (req, res) => {
       id,
       { status: 'rejected', rejectionReason, rejectedAt: new Date() },
       { new: true }
-    );
+    ).populate({
+      path: 'studentId',
+      select: 'studentID userId',
+      populate: {
+        path: 'userId',
+        select: 'name email',
+      },
+   });
     if (!request) {
       return res.status(404).json({ message: 'Request not found' });
     }
