@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from './Sidebar';
-// import { fetchRequests } from '../../api/apiService';
+import Header from './Header';
 import axios from 'axios';
 import styles from '../../pages/admin/Dashboard.module.css';
 import styles1 from './RequestsPage.module.css';
@@ -14,24 +14,21 @@ const RequestsPage = () => {
 
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedRequest, setSelectedRequest] = useState(null); // To track selected request for details view
+  const [filter, setFilter] = useState({
+    requestType: 'certificate', // Default filter values
+    status: 'pending',
+  });
 
   useEffect(() => {
     const fetchRequests = async () => {
+      setLoading(true);
       try {
-        const response = await fetch('http://localhost:7000/api/requests', {
-          method: 'GET',
-          credentials: 'include', // if using cookies for auth
+        const response = await axios.get('http://localhost:7000/api/requests', {
+          params: { ...filter }, // Send filter values as query params
+          withCredentials: true,
         });
-        const data = await response.json();
-         // Ensure `data` is an array before setting state
-         if (Array.isArray(data)) {
-          setRequests(data);
-          console.log(data);
-          // setLoading(false);
-        } else {
-          console.error("Expected data to be an array, received:", data);
-          setRequests([]);
-        }
+        setRequests(response.data || []);
       } catch (error) {
         console.error('Error fetching requests:', error);
         setRequests([]); // Set as an empty array if an error occurs
@@ -41,7 +38,17 @@ const RequestsPage = () => {
     };
 
     fetchRequests();
-  }, []);
+  }, [filter]);
+
+  const handleFilterChange = (event) => {
+    const { name, value } = event.target;
+    setFilter((prev) => ({ ...prev, [name]: value }));
+  };
+
+   // Add this useEffect to observe changes in selectedRequest
+   useEffect(() => {
+    console.log('Updated selectedRequest:', selectedRequest);
+  }, [selectedRequest]);
 
   const handleVerify = async (id) => {
     try {
@@ -50,7 +57,15 @@ const RequestsPage = () => {
         credentials: 'include',
       });
       const updatedRequest = await response.json();
-      setRequests(requests.map((req) => (req._id === id ? updatedRequest : req)));
+      setRequests(requests.filter((req) => req._id !== id));
+      if (selectedRequest && selectedRequest._id === id) {
+        setSelectedRequest({
+          ...updatedRequest.certificate,
+          submittedAt: selectedRequest.submittedAt,
+          status: 'verified',
+          requestType: selectedRequest.requestType,
+        });
+      }
     } catch (error) {
       console.error('Error verifying request:', error);
     }
@@ -68,10 +83,27 @@ const RequestsPage = () => {
         body: JSON.stringify({ rejectionReason }),
       });
       const updatedRequest = await response.json();
-      setRequests(requests.map((req) => (req._id === id ? updatedRequest : req)));
+      setRequests(requests.filter((req) => req._id !== id));
+      if (selectedRequest && selectedRequest._id === id) {
+        setSelectedRequest({
+          ...updatedRequest,
+          submittedAt: selectedRequest.submittedAt,
+          status: 'rejected',
+          rejectionReason: rejectionReason,
+          requestType: selectedRequest.requestType,
+        });
+      }
     } catch (error) {
       console.error('Error rejecting request:', error);
     }
+  };
+
+  const handleRequestClick = (request) => {
+    setSelectedRequest(request); // Set the selected request for details view
+  };
+
+  const closeDetails = () => {
+    setSelectedRequest(null); // Close the details view
   };
 
   return (
@@ -83,40 +115,68 @@ const RequestsPage = () => {
         <button className={styles.toggleButton} onClick={toggleSidebar}>
           <i className={`fa ${sidebarOpen ? 'fa-times' : 'fa-bars'}`}></i>
         </button>
+        <Header/>
         <div>
           <h2>Certificate and Transcript Requests</h2>
+          <div className={styles1.filters}>
+            <label>
+              Request Type:
+              <select name="requestType" value={filter.requestType} onChange={handleFilterChange}>
+                <option value="certificate">Certificate</option>
+                <option value="transcript">Transcript</option>
+              </select>
+            </label>
+            <label>
+              Status:
+              <select name="status" value={filter.status} onChange={handleFilterChange}>
+                <option value="pending">Pending</option>
+                <option value="verified">Verified</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </label>
+          </div>
           <div className={styles1.requestsContent}>
             {loading ? (
               <p>Loading...</p>
+            ) : selectedRequest ? (
+              <div className={styles1.detailsView}>
+                <h3>Request Details</h3>
+                <p><strong>Student ID:</strong> {selectedRequest.studentId.studentID}</p>
+                <p><strong>Student Name:</strong> {selectedRequest.studentId.userId.name}</p>
+                <p><strong>Request Type:</strong> {selectedRequest.requestType}</p>
+                <p><strong>Status:</strong> {selectedRequest.status}</p>
+                <p><strong>Submitted At:</strong> {new Date(selectedRequest.submittedAt).toLocaleString()}</p>
+                {selectedRequest.status === 'rejected' && (
+                  <p><strong>Rejection Reason:</strong> {selectedRequest.rejectionReason}</p>
+                )}
+                <div>
+                  {selectedRequest.status === 'pending' && (
+                    <>
+                      <button onClick={() => handleVerify(selectedRequest._id)}>Verify</button>
+                      <button onClick={() => handleReject(selectedRequest._id)}>Reject</button>
+                    </>
+                  )}
+                </div>
+                <button onClick={closeDetails}>Close</button>
+              </div>
             ) : (
               <table>
                 <thead>
                   <tr>
                     <th>Student ID</th>
                     <th>Student Name</th>
-                    <th>Request Type</th>
-                    <th>Status</th>
                     <th>Submitted At</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {Array.isArray(requests) && requests.map((request) => (
+                  {requests.map((request) => (
                     <tr key={request._id}>
                       <td>{request.studentId.studentID}</td>
                       <td>{request.studentId.userId.name}</td>
-                      <td>{request.requestType}</td>
-                      <td>{request.status}</td>
                       <td>{new Date(request.submittedAt).toLocaleDateString()}</td>
                       <td>
-                        {request.status === 'pending' && (
-                          <>
-                            <button onClick={() => handleVerify(request._id)}>Verify</button>
-                            <button onClick={() => handleReject(request._id)}>Reject</button>
-                          </>
-                        )}
-                        {request.status === 'rejected' && <p>Rejected: {request.rejectionReason}</p>}
-                        {request.status === 'verified' && <p>Verified</p>}
+                        <button onClick={() => handleRequestClick(request)}>View</button>
                       </td>
                     </tr>
                   ))}

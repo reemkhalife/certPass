@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import { AuthProvider } from './context/AuthContext';
 import AuthContext from './context/AuthContext';
 
-import Login from './pages/Login';
 // import Dashboard from './pages/admin/Dashboard';
 import UserDashboard from './pages/user/UserDashboard';
 import AdminDashboard from './pages/admin/adminDashboard';
@@ -40,7 +39,7 @@ function App() {
       <Router>
         <Routes>
           {/* Public Routes */}
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<SignIn />} />
 
           {/* Private Routes */}
           <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />

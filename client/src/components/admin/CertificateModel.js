@@ -82,7 +82,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Sidebar from './Sidebar';
-import "./CertificateModel.css";
+// import "./CertificateModel.css";
 import axios from 'axios';
 import styles from '../../pages/admin/Dashboard.module.css';
 
