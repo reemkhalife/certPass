@@ -61,6 +61,7 @@ const RequestsPage = () => {
       if (selectedRequest && selectedRequest._id === id) {
         setSelectedRequest({
           ...updatedRequest.certificate,
+          studentId:{studentID: selectedRequest.studentId.studentID, userId: {name: selectedRequest.studentId.userId.name}},
           submittedAt: selectedRequest.submittedAt,
           status: 'verified',
           requestType: selectedRequest.requestType,
@@ -87,6 +88,7 @@ const RequestsPage = () => {
       if (selectedRequest && selectedRequest._id === id) {
         setSelectedRequest({
           ...updatedRequest,
+          studentId:{studentID: selectedRequest.studentId.studentID, userId: {name: selectedRequest.studentId.userId.name}},
           submittedAt: selectedRequest.submittedAt,
           status: 'rejected',
           rejectionReason: rejectionReason,
