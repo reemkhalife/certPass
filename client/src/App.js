@@ -12,6 +12,7 @@ import Certificates from './components/admin/Certificates';
 // import CertificateModel from './components/admin/CertificateModel';
 import CustomFieldRequest from './components/admin/CustomFieldRequest';
 import CustomFieldForm from './components/admin/CustomFieldForm';
+import CertificateList from './components/admin/CertificateList.js';
 
 import StudentForm from './pages/user/StudentForm';
 import SignUp from './pages/SignUp.js';
@@ -45,7 +46,7 @@ function App() {
           <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
           <Route path="/admin/dashboard/certificate-model" element={<ProtectedRoute><CustomFieldForm /></ProtectedRoute>} />
           <Route path="/admin/dashboard/certificate-requests" element={<ProtectedRoute><RequestsPage /></ProtectedRoute>} />
-          <Route path="/admin/dashboard/document-requests" element={<ProtectedRoute><RequestsPage /></ProtectedRoute>} />
+          <Route path="/admin/dashboard/document-requests" element={<ProtectedRoute><CertificateList /></ProtectedRoute>} />
           <Route path="/admin/dashboard/students-registered" element={<ProtectedRoute><StudentsPage /></ProtectedRoute>} />
           <Route path="/admin/dashboard/certificates" element={<Certificates/>} />
           <Route path="/user/dashboard" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />

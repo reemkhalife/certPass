@@ -4,6 +4,8 @@ import PDFDocument from 'pdfkit';
 import QRCode from 'qrcode';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
+import { generateCertificatePDF } from '../utils/pdfGenerator.js';
 
 // Get all requests
 export const getAllRequests = async (req, res) => {
@@ -22,7 +24,6 @@ export const getAllRequests = async (req, res) => {
           select: 'name email', // Select the name and email from User model
         }
       });
-      console.log(requests);
     res.status(200).json(requests);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching requests' });
@@ -45,7 +46,6 @@ export const verifyRequest = async (req, res) => {
         select: 'name email',
       },
    });
-    console.log(request);
     if (!request) {
       return res.status(404).json({ message: 'Request not found' });
     }
@@ -56,11 +56,14 @@ export const verifyRequest = async (req, res) => {
         description,
         issueDate,
         issuingOrganization,
-        fileUrl = 'http://example.com/default-certificate.pdf', // Default value
+        // fileUrl = 'http://example.com/default-certificate.pdf', // Default value
       } = request.certificateData || {};
-      if (!name || !fileUrl) {
+      // if (!name || !fileUrl) {
+        if (!name) {
         return res.status(400).json({ message: 'Missing required certificate data' });
       }
+
+      console.log('request verified and creating certificate');
 
       const certificate = new Certificate({
         studentId: request.studentId, // Link to the student
@@ -69,13 +72,43 @@ export const verifyRequest = async (req, res) => {
         description,
         issueDate,
         issuingOrganization,
-        fileUrl,
+        // fileUrl,
       });  
+
+      console.log('certificate created');
+      
+      const __filename = fileURLToPath(import.meta.url);
+      const __dirname = path.dirname(__filename);
+
+      console.log(__dirname);
+      // Create the directory if it doesn't exist
+      const uploadDir = path.join(__dirname, '..', 'uploads', 'certificates');
+      console.log(uploadDir);
+
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+      const filePath = path.join(uploadDir, `${certificate._id}.pdf`);
+      console.log(filePath);
       try {
-        // Save the certificate
+        // Update the fileUrl field with the saved PDF path
+        certificate.fileUrl = `/uploads/certificates/${certificate._id}.pdf`;
+        console.log(certificate.fileUrl);
         const savedCertificate = await certificate.save();
-        // Generate the QR code for the certificate
+        console.log(savedCertificate);
+         // Generate the QR code for the certificate
         await certificate.generateQRCode();
+        await generateCertificatePDF(
+          {
+            name,
+            description,
+            issueDate,
+            issuingOrganization,
+            qrCodeData: certificate.qrCode
+          },
+          filePath
+        );
+
         const populatedCertificate = await Certificate.findById(
           savedCertificate._id
         ).populate({
@@ -85,7 +118,7 @@ export const verifyRequest = async (req, res) => {
             path: 'userId',
             select: 'name email',
           },
-       });
+        });
         // Send back the certificate as part of the response
         return res.status(200).json({
           message: 'Request verified and certificate created',

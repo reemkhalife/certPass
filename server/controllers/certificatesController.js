@@ -1,5 +1,28 @@
 import Certificate from "../models/certificateModel.js";
 import Organization from "../models/organizationModel.js";
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { generateCertificatePDF } from '../utils/pdfGenerator.js';
+
+export const downloadCertificate = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const certificate = await Certificate.findById(id);
+    console.log(certificate);
+    if (!certificate) {
+      return res.status(404).json({ message: 'Certificate not found' });
+    }
+    
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const filePath = path.join(__dirname, '..', 'uploads', 'certificates', `${certificate._id}.pdf`);
+    res.download(filePath, `${certificate.name}-certificate.pdf`);
+  } catch (error) {
+    console.error('Error downloading certificate:', error);
+    res.status(500).json({ message: 'Error downloading certificate' });
+  }
+};
 
 export const getPendingCertificates = async (req, res) => {
   try {
