@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Sidebar from './Sidebar';
 import { fetchStudents } from '../../api/apiService';
 import styles from '../../pages/admin/Dashboard.module.css';
+import Header from './Header';
 
 const StudentsPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -25,6 +26,7 @@ const StudentsPage = () => {
         <button className={styles.toggleButton} onClick={toggleSidebar}>
           <i className={`fa ${sidebarOpen ? 'fa-times' : 'fa-bars'}`}></i>
         </button>
+        <Header/>
         <h2>Students Registered</h2>
         <ul>
           {students.map((student, index) => (

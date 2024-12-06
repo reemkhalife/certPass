@@ -4,13 +4,10 @@ import { AuthProvider } from './context/AuthContext';
 import AuthContext from './context/AuthContext';
 
 // import Dashboard from './pages/admin/Dashboard';
-import UserDashboard from './pages/user/UserDashboard';
 import AdminDashboard from './pages/admin/adminDashboard';
 import RequestsPage from './components/admin/RequestsPage';
 import StudentsPage from './components/admin/StudentsPage';
 import Certificates from './components/admin/Certificates';
-// import CertificateModel from './components/admin/CertificateModel';
-import CustomFieldRequest from './components/admin/CustomFieldRequest';
 import CustomFieldForm from './components/admin/CustomFieldForm';
 import CertificateList from './components/admin/CertificateList.js';
 
@@ -49,7 +46,7 @@ function App() {
           <Route path="/admin/dashboard/document-requests" element={<ProtectedRoute><CertificateList /></ProtectedRoute>} />
           <Route path="/admin/dashboard/students-registered" element={<ProtectedRoute><StudentsPage /></ProtectedRoute>} />
           <Route path="/admin/dashboard/certificates" element={<Certificates/>} />
-          <Route path="/user/dashboard" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
+          <Route path="/user/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/user/dashboard/form" element={<ProtectedRoute><StudentForm /></ProtectedRoute>} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />

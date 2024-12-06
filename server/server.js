@@ -29,7 +29,7 @@ const MONGO_URI = process.env.MONGODB_URI;
 // Set up Multer storage engine
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Save files to the 'uploads' directory
+    cb(null, 'uploads/requests'); // Save files to the 'uploads' directory
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + '-' + file.originalname); // Add a timestamp to avoid name collisions

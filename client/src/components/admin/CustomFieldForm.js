@@ -3,6 +3,7 @@ import Sidebar from './Sidebar';
 import "./CertificateModel.css";
 import axios from 'axios';
 import styles from '../../pages/admin/Dashboard.module.css';
+import Header from './Header';
 
 const CustomFieldForm = () => {
   // const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -85,9 +86,7 @@ const CustomFieldForm = () => {
     try {
       const response = await fetch("http://localhost:7000/api/custom-fields");
       const data = await response.json();
-      // setCustomFields(data);
       setCustomFields(data.map(field => ({ ...field, isModified: false, isNew: false })));
-      // setUnsavedFields(data); // Keep a copy of the current state
     } catch (error) {
       console.error("Error fetching custom fields:", error);
     }
@@ -100,7 +99,6 @@ const CustomFieldForm = () => {
       return;
     }
 
-    // setUnsavedFields([...unsavedFields, newField]);
     setUnsavedFields([...unsavedFields, { ...newField, isNew: true }]);
     setNewField({ label: "", fieldType: "text", isRequired: false, options: [] });
   };
@@ -122,7 +120,6 @@ const CustomFieldForm = () => {
     setCustomFields((prevCustomFields) =>
       prevCustomFields.map((field) =>
         field._id === fieldId
-          // ? { ...field, isRequired: !field.isRequired }
           ? { ...field, isRequired: !field.isRequired, isModified: true }
           : field
       )
@@ -130,10 +127,6 @@ const CustomFieldForm = () => {
   
     setUnsavedFields((prevUnsavedFields) => {
       const fieldIndex = prevUnsavedFields.findIndex((field) => field._id === fieldId);
-      // const updatedField = {
-      //   ...customFields.find((field) => field._id === fieldId),
-      //   isRequired: !customFields.find((field) => field._id === fieldId)?.isRequired,
-      // };
       const updatedField = {
         ...customFields.find((field) => field._id === fieldId),
         isRequired: !customFields.find((field) => field._id === fieldId)?.isRequired,
@@ -161,11 +154,6 @@ const CustomFieldForm = () => {
   const handleSave = async () => {
     console.log(unsavedFields);
 
-    // if (unsavedFields.length === 0) {
-    //   alert("No changes to save.");
-    //   return;
-    // }
-
     try {
       // Save new fields
       const newFieldsResponse = await axios.post(
@@ -177,15 +165,9 @@ const CustomFieldForm = () => {
       // Check if the response data is an array
       const newFields = Array.isArray(newFieldsResponse.data) ? newFieldsResponse.data : [];
 
-      // Remove marked fields
-      // for (const fieldId of fieldsToRemove) {
-      //   await axios.delete(`http://localhost:7000/api/custom-fields/${fieldId}`);
-      // }
-
       alert("Changes saved successfully!");
 
       // Update customFields with new fields
-      // setCustomFields((prevFields) => [...prevFields, ...newFields]);
       setCustomFields((prevFields) => [
         ...prevFields,
         ...newFields.map(field => ({ ...field, isModified: false, isNew: false })),
@@ -196,7 +178,6 @@ const CustomFieldForm = () => {
 
       setFieldsToRemove([]);
       setUnsavedFields([]);
-      // setCustomFields([...customFields, ...newFields]);
     } catch (error) {
       console.error("Error saving changes:", error);
     }
@@ -212,6 +193,7 @@ const CustomFieldForm = () => {
         <Sidebar />
       </div>
       <div className={styles.mainContent}>
+        <Header/>
         <h1>Certificate Request Form Manager</h1>
         <div className={styles.addFieldSection}>
             <h3>Add New Field</h3>
