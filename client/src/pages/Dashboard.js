@@ -21,7 +21,7 @@ function Dashboard() {
         <div className="flex-1 ">
           {activeMenu === "Home" && <Home />}
           {activeMenu === "CertPass" && <CertPass />}
-          {activeMenu === "Verify & Mint" && <VerifyAndMint />}
+          {activeMenu === "Mint a Certificate" && <VerifyAndMint />}
           {activeMenu === "Academic Transcript" && <AcademicTranscript />}
           {activeMenu === "Get Support" && <GetSupport />}
         </div>

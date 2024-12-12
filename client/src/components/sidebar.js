@@ -15,9 +15,14 @@ function Sidebar({ activeMenu, setActiveMenu }) {
   const menuItems = [
     { name: "Home", icon: <FaHome className="text-lg" /> },
     { name: "CertPass", icon: <RiFilePaper2Line className="text-lg" /> },
-    { name: "Verify & Mint", icon: <MdVerified className="text-lg" /> },
+    { name: "Mint a Certificate", icon: <MdVerified className="text-lg" /> },
     { name: "Academic Transcript", icon: <FaUniversity className="text-lg" /> },
     { name: "Get Support", icon: <FaHeadset className="text-lg" /> },
+    // { name: "Home" },
+    // { name: "CertPass" },
+    // { name: "Mint a Certificate" },
+    // { name: "Academic Transcript" },
+    // { name: "Get Support" },
   ];
 
   return (
