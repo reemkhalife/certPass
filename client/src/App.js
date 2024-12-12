@@ -11,7 +11,6 @@ import Certificates from './components/admin/Certificates';
 import CustomFieldForm from './components/admin/CustomFieldForm';
 import CertificateList from './components/admin/CertificateList.js';
 
-import StudentForm from './pages/user/StudentForm';
 import SignUp from './pages/SignUp.js';
 import SignIn from './pages/SignIn.js';
 import Dashboard from './pages/Dashboard.js';
@@ -47,7 +46,6 @@ function App() {
           <Route path="/admin/dashboard/students-registered" element={<ProtectedRoute><StudentsPage /></ProtectedRoute>} />
           <Route path="/admin/dashboard/certificates" element={<Certificates/>} />
           <Route path="/user/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/user/dashboard/form" element={<ProtectedRoute><StudentForm /></ProtectedRoute>} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/dashboard" element={<Dashboard/>}/>

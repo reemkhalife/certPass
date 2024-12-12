@@ -20,6 +20,7 @@ import requestRouter from './routes/requestsRoutes.js';
 import organizationRouter from './routes/organizationRoutes.js';
 import customFieldRouter from './routes/customFieldRoutes.js';
 import Request from './models/requestModel.js';
+import uploadedCertificateRouter from './routes/uploadedCertificateRoutes.js'
 
 dotenv.config();
 const app = express();
@@ -50,6 +51,9 @@ app.use(cors(
 ));
 app.use(express.json());
 
+// Serve static files from the 'uploads' directory
+app.use('/uploads', express.static('uploads'));
+
 // Use Routes
 app.use('/api/students', studentRoutes);
 app.use('/api/analytics', analyticsRoutes);
@@ -61,6 +65,7 @@ app.use('/api/admin', adminRouter);
 app.use('/api', requestRouter);
 app.use("/api", organizationRouter);
 app.use("/api", customFieldRouter);
+// app.use("/api", uploadedCertificateRouter);
 
 app.get('/api/user/profile', (req, res) => {
   // Fetch user profile data from the database
