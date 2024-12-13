@@ -16,18 +16,19 @@ export const removeToken = () => {
   localStorage.removeItem('jwtToken');
 };
 
-// Simulate user login by saving the token
+// User login
 export const login = async (credentials) => {
-  // Replace with actual API call for login
+  console.log('Login Credentials:', credentials);  // Debugging: Check credentials being sent
+  
   const response = await fetch(`${API_URL}/auth/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(credentials),
-    credentials: 'include' // Important for sending cookies
+    credentials: 'include', // Important for sending cookies
   });
-  
+
   const data = await response.json();
 
   if (response.ok) {
@@ -39,12 +40,12 @@ export const login = async (credentials) => {
   }
 };
 
-// Simulate user logout by removing the token
+// User logout
 export const logout = () => {
   removeToken();
 };
 
-// Check if the user is logged in by checking if the token exists
+// Check if the user is logged in
 export const isAuthenticated = () => {
   const token = getToken();
   return !!token; // Returns true if token exists, otherwise false

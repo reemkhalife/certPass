@@ -31,23 +31,27 @@ export const AuthProvider = ({ children }) => {
     fetchCurrentUser();
   }, []);
 
-  const loginHandler = async (email, password) => {
+  const loginHandler = async ({ email, password }) => { // Destructure the object
     try {
-      const data = await login({ email, password });
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }), // Pass the email and password correctly
+        credentials: 'include', // Include credentials if needed
+      });
+  
+      if (!response.ok) {
+        throw new Error('Login failed');
+      }
+  
+      const data = await response.json();
       if (data.user) {
-        setUser({ id: data.user.id, role: data.user.role }); 
-        localStorage.setItem('userId', data.user.id);
-        localStorage.setItem('userRole', data.user.role);
-        if (data.user.role === "student") {
-          localStorage.setItem('studentId', data.user.studentId);
-          localStorage.setItem('studentFileNb', data.user.studentID); 
-        }
-        console.log('logged in');
-        console.log(data.user);
+        setUser (data.user);
         return true;
-      }  else {
-        // Handle the case when user is not defined
-        return false; // Or show a message to the user
+      } else {
+        return false;
       }
     } catch (error) {
       console.error('Login error:', error);
