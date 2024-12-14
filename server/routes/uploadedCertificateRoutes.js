@@ -5,39 +5,39 @@ import path from 'path';
 
 const uploadedCertificateRouter = express.Router();
 
-// Set up storage engine
-const certificateStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, '../uploads/uploadedCertificates/'); // Directory to store uploaded files
-    },
-    filename: (req, file, cb) => {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      cb(null, `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
-    }
-});
+// // Set up storage engine
+// const certificateStorage = multer.diskStorage({
+//     destination: (req, file, cb) => {
+//       cb(null, '../uploads/uploadedCertificates/'); // Directory to store uploaded files
+//     },
+//     filename: (req, file, cb) => {
+//       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+//       cb(null, `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
+//     }
+// });
   
-// Initialize multer with storage configuration
-const certificateUpload = multer({ certificateStorage });
+// // Initialize multer with storage configuration
+// const certificateUpload = multer({ certificateStorage });
 
-// Controller to handle certificate upload
-uploadedCertificateRouter.post('/uploadedCertificates', certificateUpload.single('certificate'), async (req, res) => {
-  try {
-    const { name, issueDate, uploader } = req.body;
-    const filePath = req.file.path;
+// // Controller to handle certificate upload
+// uploadedCertificateRouter.post('/uploadedCertificates', certificateUpload.single('certificate'), async (req, res) => {
+//   try {
+//     const { name, issueDate, uploader } = req.body;
+//     const filePath = req.file.path;
 
-    const newCertificate = new UploadedCertificate({
-      name,
-      issueDate,
-      filePath,
-      uploader
-    });
+//     const newCertificate = new UploadedCertificate({
+//       name,
+//       issueDate,
+//       filePath,
+//       uploader
+//     });
 
-    await newCertificate.save();
-    res.status(201).json(newCertificate);
-  } catch (error) {
-    res.status(500).json({ error: 'Error uploading certificate' });
-  }
-});
+//     await newCertificate.save();
+//     res.status(201).json(newCertificate);
+//   } catch (error) {
+//     res.status(500).json({ error: 'Error uploading certificate' });
+//   }
+// });
 
 // Controller to retrieve certificates based on status
 uploadedCertificateRouter.get('/uploadedCertificates', async (req, res) => {
