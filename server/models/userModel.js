@@ -31,6 +31,7 @@ const userSchema = new mongoose.Schema({
   role: { 
     type: String, 
     enum: Object.values(ROLE_ENUMS), 
+    default: 'student',
     required: true 
   },
   profilePicture: { 
@@ -72,18 +73,7 @@ userSchema.virtual('identification', {
   options: { match: { documentType: { $in: ['ID', 'Passport'] } } }
 });
 
-// Hash password before saving user
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
-  
-  try {
-      const hashedPassword = await bcrypt.hash(this.password, 10);
-      this.password = hashedPassword;
-      next();
-  } catch (error) {
-      next(error);
-  }
-});
+
 
 // Middleware to populate tenantId on find queries
 userSchema.pre(['find', 'findOne', 'findById'], function () {
