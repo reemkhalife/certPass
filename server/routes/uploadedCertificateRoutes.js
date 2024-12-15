@@ -86,4 +86,21 @@ uploadedCertificateRouter.delete('/uploadedCertificates/:id', async (req, res) =
   }
 });
 
+uploadedCertificateRouter.get('/uploadedCertificatesForStudent/:studentId', async (req, res) => {
+  const {studentId} = req.params;
+  console.log(studentId);
+  try {
+    const { status } = req.query;
+    const certificates = await UploadedCertificate.find({ 
+      $and: [
+          {uploader: Object(studentId)}, 
+          {status: status}
+      ]
+    });
+    res.status(200).json(certificates);
+  } catch (error) {
+    res.status(500).json({ error: 'Error fetching certificates' });
+  }
+});
+
 export default uploadedCertificateRouter;

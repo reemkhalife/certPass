@@ -46,10 +46,10 @@ function App() {
 
           {/* Private Routes */}
           <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
-          <Route path="/admin/dashboard/certificate-model" element={<ProtectedRoute><CustomFieldForm /></ProtectedRoute>} />
-          <Route path="/admin/dashboard/certificate-requests" element={<ProtectedRoute><RequestsPage /></ProtectedRoute>} />
-          <Route path="/admin/dashboard/document-requests" element={<ProtectedRoute><CertificateList /></ProtectedRoute>} />
-          <Route path="/admin/dashboard/students-registered" element={<ProtectedRoute><StudentsPage /></ProtectedRoute>} />
+          <Route path="/admin/dashboard/certificate-model" element={<ProtectedRoute allowedRoles={['admin']}><CustomFieldForm /></ProtectedRoute>} />
+          <Route path="/admin/dashboard/certificate-requests" element={<ProtectedRoute allowedRoles={['admin']}><RequestsPage /></ProtectedRoute>} />
+          <Route path="/admin/dashboard/document-requests" element={<ProtectedRoute allowedRoles={['admin']}><CertificateList /></ProtectedRoute>} />
+          <Route path="/admin/dashboard/students-registered" element={<ProtectedRoute allowedRoles={['admin']}><StudentsPage /></ProtectedRoute>} />
           <Route path="/admin/dashboard/certificates" element={<Certificates/>} />
           <Route path="/user/dashboard" element={<ProtectedRoute allowedRoles={['student']}><Dashboard /></ProtectedRoute>} />
           <Route path="/signin" element={<SignIn />} />

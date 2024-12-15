@@ -8,21 +8,27 @@ const CertificatesPage = () => {
   const [certificates, setCertificates] = useState([]); // minted/Zydia certificates
   const [requests, setRequests] = useState([]);
   const [uploadedCertificates, setUploadedCertificates] = useState([]);
-  const [filter, setFilter] = useState('Pending');
+  const [filter, setFilter] = useState('pending');
   const [filterUploaded, setFilterUploaded] = useState('Pending');
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [currentCertificate, setCurrentCertificate] = useState(null);
+  const studentId = localStorage.getItem('studentId');
+  const userId = localStorage.getItem('userId')
 
   //////////////////////////////////////////////////////////////////////ZYDIA CERTIFICATES (Verified)
   // Fetch
   useEffect(() => {
     const fetchCertificates = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:7000/api/certificates`
+        const response1 = await axios.get(
+          `http://localhost:7000/api/certificatesForStudent/${studentId}`
         );
-        setCertificates(response.data);
+        const response2 = await axios.get(
+          `http://localhost:7000/api/studentsRequests/${studentId}?status=${filter}`
+        );
+        setCertificates([...response1.data, ...response2.data]);
+        console.log(certificates);
       } catch (error) {
         console.error('Error fetching certificates:', error);
       }
@@ -65,10 +71,10 @@ const CertificatesPage = () => {
     setShowModal(false);
   };
 
-  // Edit
-  const handleEditMinted = async (id) => {
+  // // Edit
+  // const handleEditMinted = async (id) => {
     
-  };
+  // };
 
   // Delete
   const handleDeleteMinted = async (id) => {
@@ -90,11 +96,21 @@ const CertificatesPage = () => {
 
   //////////////////////////////////////////////////////////////////////ZYDIA REQUESTS (Pending/Rejected)
   // Fetch
+  useEffect(() => {
+    const fetchRequests = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:7000/api/studentsRequests/${studentId}?status=${filter}`
+        );
+        setRequests(response.data);
+        console.log(requests);
+      } catch (error) {
+        console.error('Error fetching certificates:', error);
+      }
+    };
 
-  // Edit
-  const handleEditRequest = async (id) => {
-
-  };
+    fetchRequests();
+  }, [filter]);
 
   // Delete
   const handleDeleteRequest = async (id) => {
@@ -106,10 +122,11 @@ const CertificatesPage = () => {
   useEffect(() => {
     const fetchCertificates = async () => {
       try {
+        console.log('fetching.............');
         const response = await axios.get(
-          `http://localhost:7000/api/uploadedCertificates?status=${filterUploaded}`
-        );
+          `http://localhost:7000/api/uploadedCertificatesForStudent/${userId}?status=${filterUploaded}`);
         setUploadedCertificates(response.data);
+        console.log(response.data);
       } catch (error) {
         console.error('Error fetching certificates:', error);
       }
@@ -157,17 +174,17 @@ const CertificatesPage = () => {
       Zydia Certificates
       <div className="flex justify-center gap-4 mb-6">
         <button
-          onClick={() => setFilter('Pending')}
+          onClick={() => setFilter('pending')}
           className={`px-4 py-2 rounded ${
-            filter === 'Pending' ? 'bg-blue-500' : 'bg-gray-500'
+            filter === 'pending' ? 'bg-blue-500' : 'bg-gray-500'
           }`}
         >
           Pending
         </button>
         <button
-          onClick={() => setFilter('Verified')}
+          onClick={() => setFilter('verified')}
           className={`px-4 py-2 rounded ${
-            filter === 'Verified' ? 'bg-blue-500' : 'bg-gray-500'
+            filter === 'verified' ? 'bg-blue-500' : 'bg-gray-500'
           }`}
         >
           Completed
@@ -176,35 +193,39 @@ const CertificatesPage = () => {
 
       {/* Certificate Container */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 m-4">
-        {certificates.length === 0 ? (
+        {filter === 'verified' && certificates.length === 0 ? (
           <div className="text-center text-gray-500 col-span-full">
             No certificates available.
           </div>
+        ) : filter === 'pending' && requests.length === 0 ? (
+          <div className="text-center text-gray-500 col-span-full">
+            No pending requests available.
+          </div>
         ) : (
-          certificates.map((certificate) => (
+          (filter === 'verified' ? certificates : requests).map((certificate) => (
             <div
-              key={certificate.id}
+              key={certificate._id}
               className="text-gray-200 shadow-lg rounded-lg p-4 bg-custom-gray"
             >
-              {filter === 'Verified' && (
+              {filter === 'verified' && (
                 <iframe
-                  src="http://localhost:7000/uploads/certificates/6756e503f757f13558a45824.pdf"
+                  src={`http://localhost:7000${certificate.fileUrl? certificate.fileUrl : certificate.certificateData.fileUrl}`}
                   style={{border: 'none'}}
                   className="w-full h-40 object-contain rounded-lg mb-4 overflow-hidden" 
                   title="PDF Viewer"
                 ></iframe>
               )}
-              <h3 className="text-lg font-semibold text-gray-200">{certificate.name}</h3>
-              <p className="text-sm text-gray-200">Issued on: {certificate.issueDate}</p>
+              <h3 className="text-lg font-semibold text-gray-200">{certificate.name? certificate.name : certificate.certificateData.name}</h3>
+              <p className="text-sm text-gray-200">Issued on: {certificate.issueDate? certificate.issueDate : certificate.certificateData.issueDate}</p>
               <div className="flex justify-between mt-4">
-                {filter === 'Pending' ? (
+                {filter === 'pending' ? (
                   <>
-                    <button
+                    {/* <button
                       onClick={() => handleEditMinted(certificate.id)}
                       className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
                     >
                       Edit
-                    </button>
+                    </button> */}
                     <button
                       onClick={() => handleDeleteMinted(certificate.id)}
                       className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
@@ -215,8 +236,8 @@ const CertificatesPage = () => {
                 ) : (
                   <>
                     <button
-                      onClick={() => handleDownloadMinted(certificate.id)}
-                      className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                    onClick={() => handleDownloadMinted(certificate.id)}
+                    className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
                     >
                       Download
                     </button>
@@ -264,7 +285,7 @@ const CertificatesPage = () => {
         ) : (
           uploadedCertificates.map((certificate) => (
             <div
-              key={certificate.id}
+              key={certificate._id}
               className="text-gray-200 shadow-lg rounded-lg p-4 bg-custom-gray"
             >
               {filterUploaded === 'Verified' && (

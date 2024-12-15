@@ -29,7 +29,11 @@ function SignIn() {
 
   useEffect(() => {
     if (isLoggedIn && user) {
+      console.log(user);
+      localStorage.setItem('userId', user.id );
+      localStorage.setItem('userRole', user.role );
       if (user.role === 'student') {
+        // localStorage.setItem('studenId', user.studenId );
         navigate('/user/dashboard');
       } else if (user.role === 'admin') {
         navigate('/admin/dashboard');
