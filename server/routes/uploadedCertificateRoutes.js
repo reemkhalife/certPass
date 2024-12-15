@@ -2,6 +2,7 @@ import express from 'express';
 import UploadedCertificate from '../models/uploadedCertificate.js';
 import multer from 'multer';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 const uploadedCertificateRouter = express.Router();
 
@@ -70,22 +71,6 @@ uploadedCertificateRouter.put('/uploadedCertificates/:id/verify', async (req, re
   }
 });
 
-// Controller to delete a certificate
-uploadedCertificateRouter.delete('/uploadedCertificates/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const certificate = await UploadedCertificate.findByIdAndDelete(id);
-
-    if (!certificate) {
-      return res.status(404).json({ error: 'Certificate not found' });
-    }
-
-    res.status(200).json({ message: 'Certificate deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ error: 'Error deleting certificate' });
-  }
-});
-
 uploadedCertificateRouter.get('/uploadedCertificatesForStudent/:studentId', async (req, res) => {
   const {studentId} = req.params;
   console.log(studentId);
@@ -100,6 +85,63 @@ uploadedCertificateRouter.get('/uploadedCertificatesForStudent/:studentId', asyn
     res.status(200).json(certificates);
   } catch (error) {
     res.status(500).json({ error: 'Error fetching certificates' });
+  }
+});
+
+uploadedCertificateRouter.delete('/uploadedCertificatesForStudent/delete/:id', async (req, res) => {
+  const { id } = req.params; // Assuming the request ID is passed as a route parameter
+
+  try {
+    // Find and delete the request by ID
+    const deletedRequest = await UploadedCertificate.findByIdAndDelete(id);
+
+    // Check if the request was found and deleted
+    if (!deletedRequest) {
+      return res.status(404).json({ error: 'Certificate not found' });
+    }
+
+    // Return a success response
+    res.status(200).json({ message: 'Certificate deleted successfully', deletedRequest });
+  } catch (error) {
+    // Handle errors
+    console.error('Error deleting certificate:', error);
+    res.status(500).json({ error: 'An error occurred while deleting the certificate' });
+  }
+});
+
+uploadedCertificateRouter.get('/uploadedCertificatesForStudent/:id/download', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const certificate = await UploadedCertificate.findById(id);
+    console.log(certificate);
+    if (!certificate) {
+      return res.status(404).json({ message: 'Certificate not found' });
+    }
+    
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    console.log(__dirname);
+    const fixedPath = certificate.filePath.replace(/\\/g, '/');
+    console.log(fixedPath);
+    const filePath = path.join(__dirname, '..', fixedPath);
+    res.download(filePath, `${certificate.name}-certificate.pdf`);
+  } catch (error) {
+    console.error('Error downloading certificate:', error);
+    res.status(500).json({ message: 'Error downloading certificate' });
+  }
+});
+
+uploadedCertificateRouter.get('/uploadedCertificates/:id', async (req, res) => {
+  try {
+    const certificate = await UploadedCertificate.findById(req.params.id);
+    if (!certificate) {
+      return res.status(404).json({ message: 'Certificate not found.' });
+    }
+    res.json(certificate);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error.' });
   }
 });
 

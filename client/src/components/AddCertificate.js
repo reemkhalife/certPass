@@ -4,13 +4,15 @@ const AddCertificateModal = ({ onClose, onAddCertificate, editMode, currentCerti
   const [name, setName] = useState('');
   const [issueDate, setIssueDate] = useState('');
   const [file, setFile] = useState('');
+  const [preview, setPreview] = useState('');
 
   // Pre-fill the form with existing certificate data if in edit mode
   useEffect(() => {
     if (editMode && currentCertificate) {
       setName(currentCertificate.name);
-      setIssueDate(currentCertificate.issueDate);
-      setFile(currentCertificate.image);
+      const formattedDate = new Date(currentCertificate.issueDate).toISOString().split('T')[0];
+      setIssueDate(formattedDate);
+      setFile(currentCertificate.filePath);
     }
   }, [editMode, currentCertificate]);
 
@@ -26,7 +28,6 @@ const AddCertificateModal = ({ onClose, onAddCertificate, editMode, currentCerti
       name,
       issueDate,
       uploader: localStorage.getItem("userId"),
-      // file,
     };
 
     const newCertificateToSend = new FormData();
@@ -42,14 +43,17 @@ const AddCertificateModal = ({ onClose, onAddCertificate, editMode, currentCerti
   };
 
   const handleFileUpload = (e) => {
-    console.log('Files:', e.target.files);
-    console.log('Files:', e.target.files[0]);
-    console.log('Files:', e.target.files[1]);
+    // console.log('Files:', e.target.files);
+    // console.log('Files:', e.target.files[0]);
+    // console.log('Files:', e.target.files[1]);
     const file = e.target.files[0];
-    console.log('file uploaded: ', file)
+    // console.log('file uploaded: ', file)
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => setFile(file);
+      reader.onloadend = () => {
+        setFile(file)
+        setPreview(reader.result)
+      };
       reader.readAsDataURL(file);
       // setFile(file); 
     }
@@ -99,13 +103,12 @@ const AddCertificateModal = ({ onClose, onAddCertificate, editMode, currentCerti
               type="file"
               // accept="image/*"
               onChange={(e) => handleFileUpload(e)}
-              //onChange={(e) => handleFileUpload({ target: { name: "file", value: e.target.files[0] } })}
               className="w-full"
               required={!editMode} // Only require image in edit mode if no image is already set
             />
             {file && !editMode && (
               <div className="mt-2">
-                <img src={file} alt="Certificate Preview" className="w-32 h-32 object-cover rounded-lg" />
+                <img src={preview} alt="Certificate Preview" className="w-32 h-32 object-cover rounded-lg" />
               </div>
             )}
             {editMode && file && (
