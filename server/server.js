@@ -21,6 +21,7 @@ import organizationRouter from './routes/organizationRoutes.js';
 import customFieldRouter from './routes/customFieldRoutes.js';
 import Request from './models/requestModel.js';
 import uploadedCertificateRouter from './routes/uploadedCertificateRoutes.js'
+import UploadedCertificate from './models/uploadedCertificate.js';
 
 dotenv.config();
 const app = express();
@@ -50,6 +51,8 @@ app.use(cors(
     }
 ));
 app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Serve static files from the 'uploads' directory
 app.use('/uploads', express.static('uploads'));
@@ -65,7 +68,7 @@ app.use('/api/admin', adminRouter);
 app.use('/api', requestRouter);
 app.use("/api", organizationRouter);
 app.use("/api", customFieldRouter);
-// app.use("/api", uploadedCertificateRouter);
+app.use("/api", uploadedCertificateRouter);
 
 app.get('/api/user/profile', (req, res) => {
   // Fetch user profile data from the database
@@ -104,6 +107,46 @@ app.post('/api/requests', upload.single('file'), async (req, res) => {
   } catch (error) {
     console.error("Error creating certificate request:", error);
     res.status(500).json({ error: "An error occurred while creating the request" });
+  }
+});
+
+// Set up storage engine
+const certificateStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, './uploads/uploadedCertificates'); // Directory to store uploaded files
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
+  }
+});
+
+// Initialize multer with storage configuration
+const certificateUpload = multer({ certificateStorage });
+
+// Controller to handle certificate upload
+app.post('/api/uploadedCertificates', upload.single('file'), async (req, res) => {
+  const { data } = req.body; // 'data' contains the JSON stringified object
+  const { name, issueDate, uploader } = JSON.parse(data);
+  console.log(name)
+  console.log(req.file.path)
+  try {
+    const { data } = req.body; // 'data' contains the JSON stringified object
+    const { name, issueDate, uploader } = JSON.parse(data);
+    const filePath = req.file.path;
+
+    const newCertificate = new UploadedCertificate({
+      name,
+      issueDate,
+      filePath,
+      uploader
+    });
+    console.log(newCertificate)
+
+    await newCertificate.save();
+    res.status(201).json(newCertificate);
+  } catch (error) {
+    res.status(500).json({ error: 'Error uploading certificate' });
   }
 });
 

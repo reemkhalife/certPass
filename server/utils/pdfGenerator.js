@@ -29,3 +29,24 @@ export const generateCertificatePDF = async (certificateData, outputPath) => {
     stream.on('error', reject);
   });
 };
+
+export const rejectionReasonPDF = async (rejectionData, outputPath) => {
+  console.log('generating pdf');
+  const doc = new PDFDocument();
+  const stream = fs.createWriteStream(outputPath);
+
+  return new Promise((resolve, reject) => {
+    doc.pipe(stream);
+
+    // Certificate content
+    doc.fontSize(24).text('Rejection Reason', { align: 'center' });
+    doc.moveDown();
+    doc.fontSize(18).text(`Dear: ${rejectionData.studentName}`, { align: 'left' });
+    doc.moveDown();
+    doc.fontSize(14).text(`Your certificate was rejected due to: ${rejectionData.rejectionReason}`, { align: 'left' });
+
+    doc.end();
+    stream.on('finish', () => resolve(outputPath));
+    stream.on('error', reject);
+  });
+};

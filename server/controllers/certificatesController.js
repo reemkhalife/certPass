@@ -108,3 +108,14 @@ export const getCertificate = async (req, res) => {
     res.status(500).json({ message: 'Error fetching certificate' });
   }
 };
+
+export const getCertificatesForStudent = async (req, res) => {
+  const {studentId} = req.params;
+  try {
+    const allCertificates = await Certificate.find({studentId: studentId}).populate('studentId', 'name email').populate('issuingOrganization', 'name');;
+    res.json(allCertificates);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};

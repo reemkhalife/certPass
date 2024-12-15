@@ -9,12 +9,12 @@ const uploadedCertificateSchema = new Schema({
     name: { type: String, required: true },
     issueDate: { type: Date, required: true },
     status: { type: String, enum: ['Pending', 'Verified', 'Rejeced'], default: 'Pending' },
-    fileHash: { type: String },
+    // fileHash: { type: String },
     filePath: { type: String }, // Path to the stored file
     uploader: { type: Types.ObjectId, ref: 'User' }, // Reference to the uploader
     uploadedAt: { type: Date, default: Date.now },
-    blockchainRegistered: { type: Boolean, default: false },
-  transactionHash: { type: String, default: null },
+    // blockchainRegistered: { type: Boolean, default: false },
+  // transactionHash: { type: String, default: null },
 }, { timestamps: true });
 
 const UploadedCertificate = model('UploadedCertificate', uploadedCertificateSchema);

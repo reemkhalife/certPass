@@ -3,21 +3,21 @@ import React, { useState, useEffect } from 'react';
 const AddCertificateModal = ({ onClose, onAddCertificate, editMode, currentCertificate }) => {
   const [name, setName] = useState('');
   const [issueDate, setIssueDate] = useState('');
-  const [image, setImage] = useState('');
+  const [file, setFile] = useState('');
 
   // Pre-fill the form with existing certificate data if in edit mode
   useEffect(() => {
     if (editMode && currentCertificate) {
       setName(currentCertificate.name);
       setIssueDate(currentCertificate.issueDate);
-      setImage(currentCertificate.image);
+      setFile(currentCertificate.image);
     }
   }, [editMode, currentCertificate]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!name || !issueDate || !image) {
+    if (!name || !issueDate || !file) {
       alert('All fields are required!');
       return;
     }
@@ -25,23 +25,33 @@ const AddCertificateModal = ({ onClose, onAddCertificate, editMode, currentCerti
     const newCertificate = {
       name,
       issueDate,
-      image,
+      uploader: localStorage.getItem("userId"),
+      // file,
     };
 
-    onAddCertificate(newCertificate);
+    const newCertificateToSend = new FormData();
+    newCertificateToSend.append("data", JSON.stringify(newCertificate));
+    newCertificateToSend.append("file", file); // Assuming 'fileUrl' is a file input element
+
+    onAddCertificate(newCertificateToSend);
 
     // Reset fields after adding or editing
     setName('');
     setIssueDate('');
-    setImage('');
+    setFile('');
   };
 
-  const handleImageUpload = (e) => {
+  const handleFileUpload = (e) => {
+    console.log('Files:', e.target.files);
+    console.log('Files:', e.target.files[0]);
+    console.log('Files:', e.target.files[1]);
     const file = e.target.files[0];
+    console.log('file uploaded: ', file)
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => setImage(reader.result);
+      reader.onloadend = () => setFile(file);
       reader.readAsDataURL(file);
+      // setFile(file); 
     }
   };
 
@@ -49,7 +59,7 @@ const AddCertificateModal = ({ onClose, onAddCertificate, editMode, currentCerti
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
       <div className="bg-custom-gray opacity-75 p-6 rounded-lg shadow-lg w-96">
         <h2 className="text-xl font-bold mb-4">{editMode ? 'Edit Certificate' : 'Add Certificate'}</h2>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} encType="multipart/form-data">
           <div className="mb-4">
             <label htmlFor="name" className="block text-white font-medium mb-2">
               Certificate Name
@@ -80,25 +90,27 @@ const AddCertificateModal = ({ onClose, onAddCertificate, editMode, currentCerti
           </div>
 
           <div className="mb-4">
-            <label htmlFor="image" className="block text-gray-700 font-medium mb-2">
-              Upload Image
+            <label htmlFor="file" className="block text-gray-700 font-medium mb-2">
+              Upload File
             </label>
             <input
-              id="image"
+              id="file"
+              name='file'
               type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
+              // accept="image/*"
+              onChange={(e) => handleFileUpload(e)}
+              //onChange={(e) => handleFileUpload({ target: { name: "file", value: e.target.files[0] } })}
               className="w-full"
               required={!editMode} // Only require image in edit mode if no image is already set
             />
-            {image && !editMode && (
+            {file && !editMode && (
               <div className="mt-2">
-                <img src={image} alt="Certificate Preview" className="w-32 h-32 object-cover rounded-lg" />
+                <img src={file} alt="Certificate Preview" className="w-32 h-32 object-cover rounded-lg" />
               </div>
             )}
-            {editMode && image && (
+            {editMode && file && (
               <div className="mt-2">
-                <img src={image} alt="Certificate Preview" className="w-32 h-32 object-cover rounded-lg" />
+                <img src={file} alt="Certificate Preview" className="w-32 h-32 object-cover rounded-lg" />
               </div>
             )}
           </div>

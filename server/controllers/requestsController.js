@@ -5,7 +5,7 @@ import QRCode from 'qrcode';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { generateCertificatePDF } from '../utils/pdfGenerator.js';
+import { generateCertificatePDF, rejectionReasonPDF } from '../utils/pdfGenerator.js';
 
 // Get all requests
 export const getAllRequests = async (req, res) => {
@@ -154,6 +154,46 @@ export const rejectRequest = async (req, res) => {
     if (!request) {
       return res.status(404).json({ message: 'Request not found' });
     }
+
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+
+    console.log(__dirname);
+    // Create the directory if it doesn't exist
+    const uploadDir = path.join(__dirname, '..', 'uploads', 'rejections');
+    console.log(uploadDir);
+
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    const filePath = path.join(uploadDir, `${request._id}.pdf`);
+
+    const studentName = request?.studentId?.userId?.name
+    console.log(studentName);
+
+    await rejectionReasonPDF(
+      {
+        studentName,
+        rejectionReason,
+      },
+      filePath
+    );
+
+    const updatedRequest = await Request.findByIdAndUpdate(
+      id,
+      { $set: { "certificateData.fileUrl": `/uploads/rejections/${id}.pdf` } },
+      { new: true }
+    ).populate({
+      path: 'studentId',
+      select: 'studentID userId',
+      populate: {
+        path: 'userId',
+        select: 'name email',
+      },
+   });
+
+   console.log(updatedRequest.certificateData.fileUrl);
+
     res.status(200).json(request);
   } catch (error) {
     res.status(500).json({ message: 'Error rejecting request' });
@@ -204,5 +244,43 @@ export const createRequest = async (req, res) => {
       message: 'Error creating request.',
       error: error.message,
     });
+  }
+};
+
+export const getAllRequestsForStudent = async (req, res) => {
+  try {
+    const {id} = req.params;
+    const { status } = req.query;
+
+    // status === 'verified' ? 'rejected' : 'pending';
+    let statusRequested;
+    if (status === 'verified')
+    {
+      statusRequested = 'rejected';
+    } else {
+      statusRequested = 'pending';
+    }
+
+    console.log(statusRequested);
+    const requestType = 'certificate'
+    const filter = {}
+
+    filter.requestType = requestType;
+    filter.status = statusRequested;
+    filter.studentId = Object(id)
+    // console.log(filter);
+    const requests = await Request.find(filter)
+      .populate({
+        path: 'studentId', // Populate the studentId field in Request model
+        select: 'userId studentID', // Select userId from Student model to populate user details
+        populate: {
+          path: 'userId', // Now populate the userId field in Student model
+          select: 'name email', // Select the name and email from User model
+        }
+      });
+      // console.log(requests);
+    res.status(200).json(requests);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching requests' });
   }
 };
