@@ -5,6 +5,9 @@ import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import multer from 'multer';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 import Organization from './models/organizationModel.js';
 
@@ -147,6 +150,55 @@ app.post('/api/uploadedCertificates', upload.single('file'), async (req, res) =>
     res.status(201).json(newCertificate);
   } catch (error) {
     res.status(500).json({ error: 'Error uploading certificate' });
+  }
+});
+
+app.post('/api/uploadedCertificates/:id', upload.single('file'),async (req, res) => {
+  try {
+    const { data } = req.body;
+    const { name, issueDate, uploader } = JSON.parse(data);
+    const filePath = req.file.path;
+
+    const certificate = await UploadedCertificate.findById(req.params.id)
+    if (!certificate) {
+      return res.status(404).json({ message: 'Certificate not found.' });
+    }
+
+    const oldFileFixedPath = certificate.filePath.replace(/\\/g, '/');
+    // 1734303918454-1732572987060-Class Diagram.png
+    console.log(certificate.filePath);
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const oldFilePath = path.join(__dirname, oldFileFixedPath);
+    console.log(oldFilePath);
+    // Delete the old file from the filesystem if it exists
+    console.log(fs.existsSync(oldFilePath));
+    if (oldFilePath && fs.existsSync(oldFilePath)) {
+      console.log('file found');
+      // fs.unlinkSync(oldFilePath);
+      fs.rm(oldFilePath, { force: true }, (err) => {
+        if (err) {
+          console.error(`Failed to delete file: ${err.message}`);
+        } else {
+          console.log(`Deleted file: ${oldFilePath}`);
+        }
+      });
+      
+      console.log(`Deleted old file: ${oldFilePath}`);
+    }
+
+    // Validate and update the certificate
+    const newCertificate = await UploadedCertificate.findByIdAndUpdate(
+      req.params.id,
+      { name, issueDate, filePath },
+      { new: true }
+    );
+
+    
+    res.json(newCertificate);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error.' });
   }
 });
 

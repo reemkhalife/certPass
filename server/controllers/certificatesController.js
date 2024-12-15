@@ -119,3 +119,24 @@ export const getCertificatesForStudent = async (req, res) => {
     res.status(500).send('Server Error');
   }
 };
+
+export const deleteCertificate = async (req,res) => {
+  const { id } = req.params; // Assuming the request ID is passed as a route parameter
+
+  try {
+    // Find and delete the request by ID
+    const deletedRequest = await Certificate.findByIdAndDelete(id);
+
+    // Check if the request was found and deleted
+    if (!deletedRequest) {
+      return res.status(404).json({ error: 'Certificate not found' });
+    }
+
+    // Return a success response
+    res.status(200).json({ message: 'Certificate deleted successfully', deletedRequest });
+  } catch (error) {
+    // Handle errors
+    console.error('Error deleting certificate:', error);
+    res.status(500).json({ error: 'An error occurred while deleting the certificate' });
+  }
+};

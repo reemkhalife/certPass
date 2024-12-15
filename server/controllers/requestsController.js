@@ -284,3 +284,44 @@ export const getAllRequestsForStudent = async (req, res) => {
     res.status(500).json({ message: 'Error fetching requests' });
   }
 };
+
+export const deleteRequest = async(req, res) => {
+  const { id } = req.params; // Assuming the request ID is passed as a route parameter
+
+  try {
+    // Find and delete the request by ID
+    const deletedRequest = await Request.findByIdAndDelete(id);
+
+    // Check if the request was found and deleted
+    if (!deletedRequest) {
+      return res.status(404).json({ error: 'Request not found' });
+    }
+
+    // Return a success response
+    res.status(200).json({ message: 'Request deleted successfully', deletedRequest });
+  } catch (error) {
+    // Handle errors
+    console.error('Error deleting request:', error);
+    res.status(500).json({ error: 'An error occurred while deleting the request' });
+  }
+};
+
+export const downloadPDF = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const request = await Request.findById(id);
+    console.log(request);
+    if (!request) {
+      return res.status(404).json({ message: 'Certificate not found' });
+    }
+    
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const filePath = path.join(__dirname, '..', 'uploads', 'rejections', `${request._id}.pdf`);
+    res.download(filePath, `${request.certificateData.name}-rejection-reason.pdf`);
+  } catch (error) {
+    console.error('Error downloading pdf:', error);
+    res.status(500).json({ message: 'Error downloading pdf' });
+  }
+}
